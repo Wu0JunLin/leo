@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HB05打線機管理系統</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Microsoft JhengHei', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .tabs {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 30px;
+        }
+
+        .tab-button {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            margin: 0 5px;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .tab-button:hover, .tab-button.active {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .form-container {
+            background: rgba(255,255,255,0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+            display: none;
+        }
+
+        .form-container.active {
+            display: block;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .form-title {
+            color: #333;
+            font-size: 1.8em;
+            margin-bottom: 20px;
+            text-align: center;
+            border-bottom: 3px solid #764ba2;
+            padding-bottom: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #764ba2;
+            box-shadow: 0 0 10px rgba(118, 75, 162, 0.2);
+        }
+
+        .equipment-status {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .status-option {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .status-option input[type="radio"] {
+            width: auto;
+        }
+
+        .supplies-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .supplies-title {
+            font-size: 1.2em;
+            color: #333;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+
+        .supply-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .supply-label {
+            min-width: 150px;
+            font-weight: bold;
+        }
+
+        .quantity-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .quantity-input {
+            width: 80px !important;
+            text-align: center;
+        }
+
+        .submit-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 25px;
+            font-size: 18px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: block;
+            margin: 30px auto 0;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+        }
+
+        .export-section {
+            margin-top: 30px;
+            text-align: center;
+        }
+
+        .export-btn {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 20px;
+            margin: 0 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .export-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .data-display {
+            margin-top: 30px;
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        .data-table th,
+        .data-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        .data-table th {
+            background: #f8f9fa;
+            font-weight: bold;
+        }
+
+        @media (max-width: 768px) {
+            .form-row {
+                flex-direction: column;
+            }
+            
+            .supply-item {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .equipment-status {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>HB05打線機管理系統</h1>
+            <p>設備使用登記與備品管理</p>
+        </div>
+
+        <div class="tabs">
+            <button class="tab-button active" onclick="showTab('usage')">使用時間表</button>
+            <button class="tab-button" onclick="showTab('supplies')">備品記錄表</button>
+        </div>
+
+        <!-- 使用時間表 -->
+        <div id="usage-form" class="form-container active">
+            <h2 class="form-title">HB05打線機使用時間表</h2>
+            
+            <form id="usageForm">
+                <div class="form-row">
+                    <div class="form-group" style="flex: 1;">
+                        <label for="userName">姓名 *</label>
+                        <input type="text" id="userName" name="userName" required>
+                    </div>
+                    <div class="form-group" style="flex: 1;">
+                        <label for="userEmail">電子郵件 (台科大) *</label>
+                        <input type="email" id="userEmail" name="userEmail" 
+                               pattern=".*@(mail\.)?ntust\.edu\.tw$" 
+                               title="請輸入台科大電子郵件地址" required>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group" style="flex: 1;">
+                        <label for="usageDate">使用日期 *</label>
+                        <input type="date" id="usageDate" name="usageDate" required>
+                    </div>
+                    <div class="form-group" style="flex: 1;">
+                        <label for="usageTime">使用時間 *</label>
+                        <input type="text" id="usageTime" name="usageTime" 
+                               placeholder="例如: 9:00~10:00" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>設備狀態 *</label>
+                    <div class="equipment-status">
+                        <div class="status-option">
+                            <input type="radio" id="normal" name="equipmentStatus" value="正常" required>
+                            <label for="normal">正常</label>
+                        </div>
+                        <div class="status-option">
+                            <input type="radio" id="maintenance" name="equipmentStatus" value="需要維護">
+                            <label for="maintenance">需要維護</label>
+                        </div>
+                        <div class="status-option">
+                            <input type="radio" id="malfunction" name="equipmentStatus" value="故障">
+                            <label for="malfunction">故障</label>
+                        </div>
+                        <div class="status-option">
+                            <input type="radio" id="other" name="equipmentStatus" value="其他">
+                            <label for="other">其他</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="usageRemarks">備註</label>
+                    <textarea id="usageRemarks" name="usageRemarks" rows="3" 
+                              placeholder="請輸入使用情況或其他需要說明的事項"></textarea>
+                </div>
+
+                <button type="submit" class="submit-btn">提交使用記錄</button>
+            </form>
+
+            <div class="export-section">
+                <button class="export-btn" onclick="exportUsageToExcel()">匯出完整記錄 Excel</button>
+                <button class="export-btn" onclick="exportUsageToCSV()">匯出完整記錄 CSV</button>
+                <button class="export-btn" onclick="clearUsageData()">清除資料</button>
+            </div>
+
+            <div class="data-display">
+                <h3>使用記錄</h3>
+                <div id="usageDataDisplay"></div>
+            </div>
+        </div>
+
+        <!-- 備品記錄表 -->
+        <div id="supplies-form" class="form-container">
+            <h2 class="form-title">HB05打線機備品記錄表</h2>
+            
+            <form id="suppliesForm">
+                <div class="form-row">
+                    <div class="form-group" style="flex: 1;">
+                        <label for="recordPerson">記錄人 *</label>
+                        <input type="text" id="recordPerson" name="recordPerson" required>
+                    </div>
+                    <div class="form-group" style="flex: 1;">
+                        <label for="recordEmail">電子郵件 (台科大) *</label>
+                        <input type="email" id="recordEmail" name="recordEmail" 
+                               pattern=".*@(mail\.)?ntust\.edu\.tw$" 
+                               title="請輸入台科大電子郵件地址" required>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group" style="flex: 1;">
+                        <label for="recordDate">記錄日期 *</label>
+                        <input type="date" id="recordDate" name="recordDate" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="recordRemarks">備註</label>
+                    <textarea id="recordRemarks" name="recordRemarks" rows="3" 
+                              placeholder="請輸入備品檢查情況或其他說明"></textarea>
+                </div>
+
+                <div class="supplies-section">
+                    <div class="supplies-title">清理堵塞針數量</div>
+                    <div class="supply-item">
+                        <span class="supply-label">未開封:</span>
+                        <div class="quantity-group">
+                            <input type="number" class="quantity-input" id="needleUnopened" 
+                                   name="needleUnopened" min="0" value="0">
+                            <span>個</span>
+                        </div>
+                    </div>
+                    <div class="supply-item">
+                        <span class="supply-label">開封:</span>
+                        <div class="quantity-group">
+                            <input type="number" class="quantity-input" id="needleOpened" 
+                                   name="needleOpened" min="0" value="0">
+                            <span>個</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="supplies-section">
+                    <div class="supplies-title">線材放置位置</div>
+                    <div class="form-row">
+                        <div class="form-group" style="flex: 1;">
+                            <label for="goldWirePosition">金線放置位置</label>
+                            <input type="text" id="goldWirePosition" name="goldWirePosition" 
+                                   placeholder="例如: A1槽位">
+                        </div>
+                        <div class="form-group" style="flex: 1;">
+                            <label for="alWirePosition">鋁線放置位置</label>
+                            <input type="text" id="alWirePosition" name="alWirePosition" 
+                                   placeholder="例如: B2槽位">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="supplies-section">
+                    <div class="supplies-title">金線位置 - Wedge鋼嘴數量</div>
+                    <div class="supply-item">
+                        <span class="supply-label">未開封:</span>
+                        <div class="quantity-group">
+                            <input type="number" class="quantity-input" id="goldWedgeUnopened" 
+                                   name="goldWedgeUnopened" min="0" value="0">
+                            <span>個</span>
+                        </div>
+                    </div>
+                    <div class="supply-item">
+                        <span class="supply-label">開封:</span>
+                        <div class="quantity-group">
+                            <input type="number" class="quantity-input" id="goldWedgeOpened" 
+                                   name="goldWedgeOpened" min="0" value="0">
+                            <span>個</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="supplies-section">
+                    <div class="supplies-title">金線位置 - Ball瓷嘴數量</div>
+                    <div class="supply-item">
+                        <span class="supply-label">未開封:</span>
+                        <div class="quantity-group">
+                            <input type="number" class="quantity-input" id="goldBallUnopened" 
+                                   name="goldBallUnopened" min="0" value="0">
+                            <span>個</span>
+                        </div>
+                    </div>
+                    <div class="supply-item">
+                        <span class="supply-label">開封:</span>
+                        <div class="quantity-group">
+                            <input type="number" class="quantity-input" id="goldBallOpened" 
+                                   name="goldBallOpened" min="0" value="0">
+                            <span>個</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="supplies-section">
+                    <div class="supplies-title">鋁線位置 - Wedge鋼嘴數量</div>
+                    <div class="supply-item">
+                        <span class="supply-label">未開封:</span>
+                        <div class="quantity-group">
+                            <input type="number" class="quantity-input" id="alWedgeUnopened" 
+                                   name="alWedgeUnopened" min="0" value="0">
+                            <span>個</span>
+                        </div>
+                    </div>
+                    <div class="supply-item">
+                        <span class="supply-label">開封:</span>
+                        <div class="quantity-group">
+                            <input type="number" class="quantity-input" id="alWedgeOpened" 
+                                   name="alWedgeOpened" min="0" value="0">
+                            <span>個</span>
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" class="submit-btn">提交備品記錄</button>
+            </form>
+
+            <div class="export-section">
+                <button class="export-btn" onclick="exportSuppliesToExcel()">匯出 Excel</button>
+                <button class="export-btn" onclick="clearSuppliesData()">清除資料</button>
+            </div>
+
+            <div class="data-display">
+                <h3>備品記錄</h3>
+                <div id="suppliesDataDisplay"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 引入 SheetJS 來處理 Excel 檔案 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    
+    <script>
+        // 全域變數儲存資料
+        let usageData = JSON.parse(localStorage.getItem('hb05UsageData')) || [];
+        let suppliesData = JSON.parse(localStorage.getItem('hb05SuppliesData')) || [];
+
+        // 頁面載入時顯示資料
+        document.addEventListener('DOMContentLoaded', function() {
+            displayUsageData();
+            displaySuppliesData();
+            
+            // 設定今天的日期為預設值
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('usageDate').value = today;
+            document.getElementById('recordDate').value = today;
+        });
+
+        // 切換分頁
+        function showTab(tabName) {
+            // 隱藏所有表單
+            document.querySelectorAll('.form-container').forEach(container => {
+                container.classList.remove('active');
+            });
+            
+            // 移除所有按鈕的 active 類
+            document.querySelectorAll('.tab-button').forEach(button => {
+                button.classList.remove('active');
+            });
+            
+            // 顯示指定的表單
+            document.getElementById(tabName + '-form').classList.add('active');
+            
+            // 添加按鈕的 active 類
+            event.target.classList.add('active');
+        }
+
+        // 處理使用時間表提交
+        document.getElementById('usageForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const record = {
+                timestamp: new Date().toLocaleString('zh-TW'),
+                姓名: formData.get('userName'),
+                電子郵件: formData.get('userEmail'),
+                使用日期: formData.get('usageDate'),
+                使用時間: formData.get('usageTime'),
+                設備狀態: formData.get('equipmentStatus'),
+                備註: formData.get('usageRemarks') || ''
+            };
+            
+            usageData.push(record);
+            localStorage.setItem('hb05UsageData', JSON.stringify(usageData));
+            
+            // 自動匯出CSV檔案
+            exportSingleUsageRecordToCSV(record);
+            
+            alert('使用記錄已成功提交並匯出CSV檔案！');
+            this.reset();
+            document.getElementById('usageDate').value = new Date().toISOString().split('T')[0];
+            displayUsageData();
+        });
+
+        // 處理備品記錄表提交
+        document.getElementById('suppliesForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const record = {
+                timestamp: new Date().toLocaleString('zh-TW'),
+                記錄人: formData.get('recordPerson'),
+                電子郵件: formData.get('recordEmail'),
+                記錄日期: formData.get('recordDate'),
+                備註: formData.get('recordRemarks') || '',
+                清理堵塞針_未開封: formData.get('needleUnopened'),
+                清理堵塞針_開封: formData.get('needleOpened'),
+                金線放置位置: formData.get('goldWirePosition') || '',
+                鋁線放置位置: formData.get('alWirePosition') || '',
+                金線Wedge鋼嘴_未開封: formData.get('goldWedgeUnopened'),
+                金線Wedge鋼嘴_開封: formData.get('goldWedgeOpened'),
+                金線Ball瓷嘴_未開封: formData.get('goldBallUnopened'),
+                金線Ball瓷嘴_開封: formData.get('goldBallOpened'),
+                鋁線Wedge鋼嘴_未開封: formData.get('alWedgeUnopened'),
+                鋁線Wedge鋼嘴_開封: formData.get('alWedgeOpened')
+            };
+            
+            suppliesData.push(record);
+            localStorage.setItem('hb05SuppliesData', JSON.stringify(suppliesData));
+            
+            alert('備品記錄已成功提交！');
+            this.reset();
+            document.getElementById('recordDate').value = new Date().toISOString().split('T')[0];
+            // 重置數量輸入為0
+            document.querySelectorAll('.quantity-input').forEach(input => {
+                input.value = 0;
+            });
+            displaySuppliesData();
+        });
+
+        // 顯示使用記錄
+        function displayUsageData() {
+            const container = document.getElementById('usageDataDisplay');
+            if (usageData.length === 0) {
+                container.innerHTML = '<p>尚無使用記錄</p>';
+                return;
+            }
+            
+            let html = '<table class="data-table"><thead><tr>';
+            const headers = Object.keys(usageData[0]);
+            headers.forEach(header => {
+                html += `<th>${header}</th>`;
+            });
+            html += '</tr></thead><tbody>';
+            
+            usageData.slice().reverse().forEach(record => {
+                html += '<tr>';
+                headers.forEach(header => {
+                    html += `<td>${record[header]}</td>`;
+                });
+                html += '</tr>';
+            });
+            
+            html += '</tbody></table>';
+            container.innerHTML = html;
+        }
+
+        // 顯示備品記錄
+        function displaySuppliesData() {
+            const container = document.getElementById('suppliesDataDisplay');
+            if (suppliesData.length === 0) {
+                container.innerHTML = '<p>尚無備品記錄</p>';
+                return;
+            }
+            
+            let html = '<table class="data-table"><thead><tr>';
+            const headers = Object.keys(suppliesData[0]);
+            headers.forEach(header => {
+                html += `<th>${header}</th>`;
+            });
+            html += '</tr></thead><tbody>';
+            
+            suppliesData.slice().reverse().forEach(record => {
+                html += '<tr>';
+                headers.forEach(header => {
+                    html += `<td>${record[header]}</td>`;
+                });
+                html += '</tr>';
+            });
+            
+            html += '</tbody></table>';
+            container.innerHTML = html;
+        }
+
+        // 匯出單筆使用記錄到 CSV
+        function exportSingleUsageRecordToCSV(record) {
+            // 建立CSV內容
+            const headers = Object.keys(record);
+            const csvContent = [
+                // CSV 標題行
+                headers.join(','),
+                // 資料行
+                headers.map(key => {
+                    const value = record[key] || '';
+                    // 處理包含逗號或雙引號的值
+                    if (value.toString().includes(',') || value.toString().includes('"') || value.toString().includes('\n')) {
+                        return `"${value.toString().replace(/"/g, '""')}"`;
+                    }
+                    return value;
+                }).join(',')
+            ].join('\n');
+            
+            // 建立並下載檔案
+            const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            link.setAttribute('href', url);
+            
+            // 生成檔案名稱：包含日期時間和使用者姓名
+            const now = new Date();
+            const dateStr = now.toISOString().split('T')[0];
+            const timeStr = now.toTimeString().split(' ')[0].replace(/:/g, '');
+            const userName = record.姓名.replace(/[^a-zA-Z0-9\u4e00-\u9fa5]/g, ''); // 移除特殊字符
+            const filename = `HB05使用記錄_${userName}_${dateStr}_${timeStr}.csv`;
+            
+            link.setAttribute('download', filename);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+        }
+
+        // 匯出完整使用記錄到 CSV
+        function exportUsageToCSV() {
+            if (usageData.length === 0) {
+                alert('沒有資料可以匯出');
+                return;
+            }
+            
+            // 建立CSV內容
+            const headers = Object.keys(usageData[0]);
+            const csvRows = [
+                // CSV 標題行
+                headers.join(','),
+                // 資料行
+                ...usageData.map(record => 
+                    headers.map(key => {
+                        const value = record[key] || '';
+                        // 處理包含逗號或雙引號的值
+                        if (value.toString().includes(',') || value.toString().includes('"') || value.toString().includes('\n')) {
+                            return `"${value.toString().replace(/"/g, '""')}"`;
+                        }
+                        return value;
+                    }).join(',')
+                )
+            ];
+            
+            const csvContent = csvRows.join('\n');
+            
+            // 建立並下載檔案
+            const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            link.setAttribute('href', url);
+            
+            const filename = `HB05打線機完整使用記錄_${new Date().toISOString().split('T')[0]}.csv`;
+            link.setAttribute('download', filename);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+        }
+
+        // 匯出使用記錄到 Excel
+        function exportUsageToExcel() {
+            if (usageData.length === 0) {
+                alert('沒有資料可以匯出');
+                return;
+            }
+            
+            const ws = XLSX.utils.json_to_sheet(usageData);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "使用時間記錄");
+            
+            const filename = `HB05打線機使用記錄_${new Date().toISOString().split('T')[0]}.xlsx`;
+            XLSX.writeFile(wb, filename);
+        }
+
+        // 匯出備品記錄到 Excel
+        function exportSuppliesToExcel() {
+            if (suppliesData.length === 0) {
+                alert('沒有資料可以匯出');
+                return;
+            }
+            
+            const ws = XLSX.utils.json_to_sheet(suppliesData);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "備品記錄");
+            
+            const filename = `HB05打線機備品記錄_${new Date().toISOString().split('T')[0]}.xlsx`;
+            XLSX.writeFile(wb, filename);
+        }
+
+        // 清除使用記錄
+        function clearUsageData() {
+            if (confirm('確定要清除所有使用記錄嗎？此操作無法復原。')) {
+                usageData = [];
+                localStorage.removeItem('hb05UsageData');
+                displayUsageData();
+                alert('使用記錄已清除');
+            }
+        }
+
+        // 清除備品記錄
+        function clearSuppliesData() {
+            if (confirm('確定要清除所有備品記錄嗎？此操作無法復原。')) {
+                suppliesData = [];
+                localStorage.removeItem('hb05SuppliesData');
+                displaySuppliesData();
+                alert('備品記錄已清除');
+            }
+        }
+    </script>
+</body>
+</html>
